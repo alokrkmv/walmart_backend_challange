@@ -4,6 +4,7 @@ from pathlib import Path
 from readfile import readfile
 from movietheater import movie_theater
 from writer import write_to_file
+import test_script
 if __name__=='__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument("file_path", type=Path)
@@ -19,6 +20,13 @@ if __name__=='__main__':
     # Write the final result to the output file
     write_to_file.writer(final_reservations)
     print("Program executed successfully !!! Please check the output file in the dataset folder")
+
+    print("Running test scripts")
+    print("+++++++++++++++++++++++++++++")
+    test_script_obj = test_script.TestScript(input_data, final_reservations)
+    test_script_obj.run_test()
+    print("Test scripts executed successfully")
+
     
     
 
