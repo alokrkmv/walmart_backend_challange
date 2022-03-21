@@ -49,6 +49,7 @@ class Main():
     
     # Function for assigning seats
     def assign_seats(self,req_number,seat_requested):
+        
 
         total_required_seats = seat_requested
         book_seats = []
@@ -79,7 +80,7 @@ class Main():
                     while (total_required_seats>0 and split_row>=0):
                         # Check any left out seats in the row
                         if self.get_seat_remaining_in_row(split_row)>1:
-                            for find_seat in range(self.col-1):
+                            for find_seat in range(self.col):
                                 if self.seatMap[split_row][find_seat]==False:
                                     self.seatMap[split_row][find_seat] = True
                                     book_seats.append(str(split_row)+ " " + str(find_seat))
@@ -96,6 +97,7 @@ class Main():
 
     # This function checks if it possible to make groups seat together
     def find_seats_together(self,seat_requested,row_index):
+      
      
         res = [-1,-1]
         for row in range(row_index,-1,-1):
@@ -115,6 +117,8 @@ class Main():
                         seat_counter = seat_counter + 1
                     else:
                         break
+                if seat_counter == self.col-1:
+                    seat_counter+=1
                 if seat_count_remaining==0:
                     res = [row,seat_counter-seat_requested]
                     return res
