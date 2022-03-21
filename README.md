@@ -1,4 +1,4 @@
-# walmart_backend_challange
+# Walmart Backend Challange
 
 
 [![forthebadge made-with-python](http://ForTheBadge.com/images/badges/made-with-python.svg)](https://www.python.org/)
