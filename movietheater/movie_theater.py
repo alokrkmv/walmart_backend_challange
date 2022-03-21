@@ -6,13 +6,10 @@ class Main():
         self.input_data = input_dict
         self.rows = 11
         self.col = 20
-        self.total_seats = self.rows * self.col
         self.buffer_seats = 3
         self.buffer_rows = 1
         # Seat Map represnts the entire theater in the form of a 2D boolean matrix
         self.seatMap = [[False for x in range(self.col)] for y in range(self.rows)]
-        # Seat Remaning represnts the remaining seats in each row
-        self.seatRemaning = [self.col]*self.rows
         # Final result
         self.final_res = defaultdict(list)
 
@@ -20,20 +17,17 @@ class Main():
     def __str__(self):
         print(f"Input data: {self.input_data}")
         print(f"Seat map: {self.seatMap}")
-        print(f"Seat Remaning: {self.seatRemaning}")
         print(f"Final result: {self.final_res}")
 
     # Entry point of the program
     def make_reservation(self):
         for key,value in self.input_data.items():
-            # Checking the edge cases for any invalid request
-            # if key == "R012":
-            #     import pdb
-            #     pdb.set_trace()
             
+            # Check for any invalid inputs like 0 reservations etc
             if value<=0: 
                 self.final_res[key] = "Invalid Reservation"
                 continue
+            # Check if the seats are available
             if value>self.get_total_seats():
                 self.final_res[key] = "House full"
                 continue
@@ -55,11 +49,10 @@ class Main():
     
     # Function for assigning seats
     def assign_seats(self,req_number,seat_requested):
-        # if req_number == "R012":
-        #     import pdb
-        #     pdb.set_trace()
+
         total_required_seats = seat_requested
         book_seats = []
+        # Iterating over each row to check the available seats
         for row_index in range(self.rows-1,0,-1):
             if self.get_seat_remaining_in_row(row_index)>=seat_requested:
                 # Check if the seats are available in a group
@@ -67,31 +60,34 @@ class Main():
                 # If it is possible to make groups seat together
                 if avl_seats[0]!=-1:
                     last_seat_index = avl_seats[1]+seat_requested-1
-                    # Mark the seats as occupied
+                    # Mark the seats as occupied in the seat map
                     row = avl_seats[0]
                     for seat_index in range(avl_seats[1],last_seat_index+1):
                         self.seatMap[row][seat_index] = True
+                    # Fill the buffer seats(seats which are in the range of row buffer and col buffer)
                     self.fill_buffer_seats(avl_seats[0],avl_seats[1],seat_requested,last_seat_index)
-                    self.seatRemaning[avl_seats[0]] -=seat_requested
-                    self.total_seats -= seat_requested
+                    # Create itenary for the seats and add it to the final result
                     counter = 0
                     while counter<total_required_seats:
                         self.final_res[req_number].append(f"{chr(avl_seats[0]+65-1)}{avl_seats[1]+counter+1}")
                         counter+=1
                     return
                 else:
+                    # If it is not possible to make groups seat together then we need
+                    # to split the group and assign the seats in smaller groups
                     split_row = self.rows-1
                     while (total_required_seats>0 and split_row>=0):
+                        # Check any left out seats in the row
                         if self.get_seat_remaining_in_row(split_row)>1:
                             for find_seat in range(self.col-1):
                                 if self.seatMap[split_row][find_seat]==False:
                                     self.seatMap[split_row][find_seat] = True
                                     book_seats.append(str(split_row)+ " " + str(find_seat))
                                     self.final_res[req_number].append(f"{chr(split_row+65-1)}{find_seat+1}")
-                                    self.total_seats-=1
-                                    self.seatRemaning[split_row]-=1
                                     total_required_seats-=1
                         split_row-=1
+                    # Add the seats in the row and column  buffer of the assigned seats
+                    # as booked in the seat map
                     self.fill_partition_buffer(book_seats)
                     return
                 
@@ -124,28 +120,20 @@ class Main():
                     return res
         return res
 
-    # This function takes care of filling buffer seats (both row buffer and col buffer )
+    # This function takes care of filling buffer seats in case of contigous allocation (both row buffer and col buffer )
     def fill_buffer_seats(self,row_index,col_index,seat_requested,last_seat):
         for num_row in range(1,self.buffer_rows+1):
             if row_index-num_row>0:
                 for safety in range(seat_requested):
                     self.seatMap[row_index-num_row][col_index+safety] = True
-                    self.seatRemaning[row_index-num_row] -=1
-                    self.total_seats-=1
             if num_row+row_index<self.rows-1:
                 for safety in range(seat_requested):
                     self.seatMap[row_index+num_row][col_index+safety] = True
-                    self.seatRemaning[row_index+num_row] -=1
-                    self.total_seats-=1
             for j in range(1,self.buffer_seats+1):
                 if j+last_seat<=self.col-1:
                     self.seatMap[row_index][last_seat+j] = True
-                    self.seatRemaning[row_index] -=1
-                    self.total_seats-=1
                 if col_index-j>=0 and not self.seatMap[row_index][col_index-j]:
                     self.seatMap[row_index][col_index-j] = True
-                    self.seatRemaning[row_index] -=1
-                    self.total_seats-=1
 
     # Fills the partition buffer in case of split seating arrangement
     def fill_partition_buffer(self,booked_seats):
@@ -172,6 +160,7 @@ class Main():
                     self.seatMap[get_row][seat_l] = True
                 col_counter+=1
     
+    # Get total available seats in the theater at any given time
     def get_total_seats(self):
         total_seats = 0
         for i in range(1,len(self.seatMap)):
@@ -180,6 +169,7 @@ class Main():
                     total_seats+=1
         return total_seats
     
+    # Get total available seats in a particular row at any given time
     def get_seat_remaining_in_row(self,row_index):
         total_seats = 0
         for i in range(len(self.seatMap[row_index])):

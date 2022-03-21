@@ -1,3 +1,4 @@
+# Write the data to the output file in the required format
 def writer(data: dict)->None:
     """
     Write the data to a file.

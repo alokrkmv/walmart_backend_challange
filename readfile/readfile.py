@@ -1,3 +1,4 @@
+# Parse the input filr and create a dictionary of input data
 def parse_file(filereader):
     """
     Parse a file and return a list of lines.
