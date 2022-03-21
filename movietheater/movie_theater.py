@@ -31,8 +31,11 @@ class Main():
             #     import pdb
             #     pdb.set_trace()
             
-            if value<=0 or value>self.get_total_seats():
+            if value<=0: 
                 self.final_res[key] = "Invalid Reservation"
+                continue
+            if value>self.get_total_seats():
+                self.final_res[key] = "House full"
                 continue
             req_number = key
             seat_requested = value
